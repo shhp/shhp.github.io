@@ -206,12 +206,12 @@ h3 {
 	width: 270px;
 }
 
-#subscribe {
+/*#subscribe {
 	width: 75px;
 	height: 11px;
 	right: 50px;
 	background-image: url(images/subscribe.png);
-}
+}*/
 
 /* @end */
 
@@ -318,7 +318,7 @@ h3 {
 	line-height: 15px;
 }
 
-.entry-comments {
+/*.entry-comments {
 	background-image: url(images/bubble.png);
 	float: left;
 	width: 40px;
@@ -328,7 +328,7 @@ h3 {
 	text-align: center;
 	font-size: 16px;
 	color: white;
-}
+}*/
 
 /* @group Entry Contents */
 
@@ -521,7 +521,7 @@ h3 {
 	margin-left: -24px;
 	width: 320px;
 	height: 40px;
-	background-image: url(images/search.png);
+	/*background-image: url(images/search.png);*/
 }
 
 #search input {
