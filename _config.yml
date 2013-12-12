@@ -12,6 +12,3 @@ copyright:
 css:
     - /lib/blog.css
     - /lib/syntax.css
-
-js:  
-    - /lib/blog.js
