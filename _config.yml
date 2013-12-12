@@ -1,0 +1,17 @@
+paginate: 5
+
+title: shhp的博客·学无止境
+
+author:
+    name: shhp
+    email: herculeshhp@gmail.com
+	
+copyright:
+    - Design by <a href="http://ipsleung.com">Iris Leung</a>
+	
+css:
+    - /lib/blog.css
+    - /lib/syntax.css
+
+js:  
+    - /lib/blog.js
