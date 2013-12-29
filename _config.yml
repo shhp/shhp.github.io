@@ -1,6 +1,8 @@
 pygments: false
 paginate: 5
 
+encoding: utf-8
+
 title: shhp的博客·学无止境
 
 author:

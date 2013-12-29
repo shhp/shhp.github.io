@@ -21,32 +21,23 @@
 	<body>
 		<div id="header">
 			<h1>
-				<a href="/">{{ site.title }}</a>
+				{{ site.title }}
 			</h1>
-			
-			<!--div>
-				<span>/*</span> {{ site.comment }} <span>*/</span>
-			</div>
-			
-			<a href="{{ site.feed }}" id="subscribe">Subscribe</a-->
-			
+							
 		</div>
 		
-		<div id="content">
-			<div id="alpha">
+		<div id="banner">
+			<a href="/" class="fork" style="left: 3%;"> <strong> Blog </strong> </a>
+			<a href="https://github.com/shhp" class="fork" style="left: 8%;"> <strong> My GitHub </strong> </a>
+		</div>
+		
+		<div class="post_container">			
 				{{ content }}
-			</div>
-			
-			<!--div id="beta">
-				{% if page.sidebar != false %}
-					{% include sidebar.html %}
-				{% endif %}
-			</div-->
-			
+									
 			<div class="clear"></div>
 		</div>
 		
-		<div id="footer">
+		<!--div id="footer">
 			<!--div id="about">
 				{% for phrase in site.footer %}
 					<div>
@@ -54,13 +45,13 @@
 						{{ phrase.action }}
 					</div>
 				{% endfor %}
-			</div-->
+			</div>
 			<div id="copyright">
 				{% for line in site.copyright %}
 					<div>{{ line }}</div>
 				{% endfor %}
 			</div>
-		</div>
+		</div-->
 		
 		{% for js in site.js %}
 			<script src="{{ js }}" type="text/javascript" charset="utf-8"></script>
