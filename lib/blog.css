@@ -543,6 +543,18 @@ div.post_container {
 	color: #8a8a8a;
 }
 
+img {
+	margin: 0 auto;
+	display: block;
+    width: 80%;
+}
+
+em {
+	margin: 0 auto;
+	display: block;
+	text-align: center;
+}
+
 /* @end */
 
 
