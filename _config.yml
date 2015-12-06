@@ -1,4 +1,5 @@
-pygments: false
+highlighter: pygments
+gems: [jekyll-paginate]
 paginate: 5
 
 encoding: utf-8

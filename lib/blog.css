@@ -50,6 +50,7 @@ textarea {
 
 code, pre {
 	font-family: monospace;
+	background-color: #eee;
 }
 
 ol, ul {
@@ -378,7 +379,6 @@ div.post_container {
 	padding: 0.5em 1em;
 	line-height: 1.4;
 	overflow: auto;
-	background: transparent url(images/code.png) !important;
 }
 
 .entry-contents ul {
