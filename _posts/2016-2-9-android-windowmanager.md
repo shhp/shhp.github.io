@@ -14,7 +14,7 @@ title: 探秘Android之WindowManager
 
 <!-- more -->
 
-###`WindowManager`是什么
+### `WindowManager`是什么
 
 根据`WindowManager`的定义
 
@@ -179,7 +179,7 @@ title: 探秘Android之WindowManager
 
 再次回到`Activity.attach`方法。第5973行将`Window`的成员变量`mWindowManager`指向的`WindowManagerImpl`对象赋给了`Activity`的成员变量`mWindowManager`. 至此，我们就知道了通过`Activity.getSystemService(Context.WINDOW_SERVICE);`拿到的是一个`WindowManager`的实现类`WindowManagerImpl`的对象。对于非`Activity`的`Context`，调用它们的`getSystemService`方法实际上会调用`ContextImpl.getSystemService`. 这个方法返回的也是一个`WindowManagerImpl`的对象。只不过这个`WindowManagerImpl`的对象的成员变量`mParentWindow`为`null`，也就是没有关联任何`Window`对象。
 
-###`WindowManager.addView`做了什么
+### `WindowManager.addView`做了什么
 
 接下来探究一下`WindowManager.addView`到底做了什么。
 
@@ -328,7 +328,7 @@ title: 探秘Android之WindowManager
 
 最后282行调用了`ViewRootImpl.setView`, 在这个方法中`ViewRootImpl`会去通知`WindowManagerService`将新的视图添加到屏幕上。
 
-###总结
+### 总结
 
 这篇文章所讲的内容可以浓缩成下面这张图。
 
