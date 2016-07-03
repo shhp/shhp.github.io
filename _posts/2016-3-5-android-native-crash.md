@@ -44,9 +44,9 @@ Linux man page对`sigaction`的解释是这样的：
 
 至于还原函数调用栈，主要是参考了Android中的[libcorkscrew](https://android.googlesource.com/platform/system/core/+/jb-mr2-release/libcorkscrew/)库的源代码，这里不做详述。
 
-###C程序的编译和链接
+### C程序的编译和链接
 
-####ELF文件
+#### ELF文件
 
 当我们用`gcc`去编译一个`C`工程的时候，通常每一个`.c`文件都会对应生成一个`.o`目标文件。这些`.o`目标文件是一种被称作ELF(Executable and Linking Format)格式的文件。
 
@@ -71,7 +71,7 @@ Linux man page对`sigaction`的解释是这样的：
 
 链接器在链接可执行文件或动态库的过程中，它会把来自不同可重定位对象文件中具有相同属性(比方都是只读并可加载的)的section合并成所谓**segment**.
 
-###符号表
+### 符号表
 
 在一个可重定位`.o`文件中有一个比较重要的section叫符号表。它记录了源文件中声明的变量名以及函数名等符号的一些信息。下面用一个例子来说明。
 
@@ -101,7 +101,7 @@ Linux man page对`sigaction`的解释是这样的：
 
 3. 符号本身。
 
-####链接
+#### 链接
 
 在`C`中可以通过`extern`关键字声明一个在其他`.c`文件中定义的变量或是函数。在上面`test.c`文件中加入一个`foo`函数的声明如下：
 
