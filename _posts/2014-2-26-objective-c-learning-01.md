@@ -27,6 +27,7 @@ Objective-C提供两种方式来声明一个类（interface）中的成员变量
    
    类的property对外是公开的，在非本类的代码中可以通过getter以及点方法访问property。
    另外，Objective-C允许为property定义各种属性，不同的属性赋予了property不同的特性，参考http://rypress.com/tutorials/objective-c/properties.html
+   
     <!-- more -->
 
 2. **instance variable**

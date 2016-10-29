@@ -11,6 +11,7 @@ title: Android animation开发笔记
 如果在xml文件中将fillAfter设置为true，那么在动画播放完毕后，视图会停留在动画的最后一个状态，这种效果是符合预期的。但是如果将fillBefore设置为false同时
 设置了startOffset，就会发现在动画真正开始前视图就已经处于动画的第一个状态，也就意味着fillBefore＝false不起作用。按照官方文档的说明，fillBefore＝false
 只有在fillEnable被设置为true的情况下才会起作用。为何会出现这种奇怪的问题？从源代码中可以找到答案。以下是Animation的getTransformation函数中的几行代码：
+
 <!-- more -->
 
     final long startOffset = getStartOffset();

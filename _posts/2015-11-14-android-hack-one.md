@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Android Hack(1)－－制造crash：java.lang.SecurityException：Unable to find app for caller android.app.ApplicationThreadProxy@xxxxxxxx (pid=xxxx) when getting content provider XXXXXX
+title: Android Hack(1)－－制造crash：java.lang.SecurityException：Unable to find app for caller
 ---
 
 最近触宝电话的crash日志中出现了如下较多的一个crash：

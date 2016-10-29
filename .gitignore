@@ -1,3 +1,6 @@
 _site
 
 Gemfile
+
+*/.DS_Store
+lib/images/.DS_Store

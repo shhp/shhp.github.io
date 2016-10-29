@@ -45,6 +45,7 @@ title: Code Jam 2014之Cookie Clicker Alpha
     the game starts you'll have 2π cookies.
 
 **My solution:**
+
 <!-- more -->
 
 假设当前cookie的增加速率为r，此时有两种选择：
