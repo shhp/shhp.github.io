@@ -10,10 +10,12 @@ title: 理解RxJava的事件传递链
 
 假设有这么一段抽象的RxJava代码：
 
-	O1
-	.operator1(...) 
-	.operator2(...) 
-	.subscribe(S1)
+```java
+O1
+.operator1(...) 
+.operator2(...) 
+.subscribe(S1)
+```
 
 其中`O1`是真正产生数据的`Observable`，然后将两个操作符`operator1`和`operator2`作用到`O1`上，最后用`S1`进行订阅。一般而言操作符有两种实现方式：1.
  实现`OnSubscribe`；2.
