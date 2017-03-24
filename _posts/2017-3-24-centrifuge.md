@@ -17,9 +17,11 @@ title: 利用annotation提取代码
 
 首先定义一个`Annotation`如下：
 
-    @Target({ElementType.METHOD, ElementType.CONSTRUCTOR, ElementType.TYPE})
-    public @interface LaunchPerf {
-    }
+```java
+@Target({ElementType.METHOD, ElementType.CONSTRUCTOR, ElementType.TYPE})
+public @interface LaunchPerf {
+}
+```
     
 在`@Target`中指定`@LaunchPerf`可以用来标注类、构造函数以及函数。
 
@@ -27,9 +29,11 @@ title: 利用annotation提取代码
 
 接下来实现我们自己的Annotation Processor. 我们需要创建一个`AbstractProcessor`的子类：
 
-    @SupportedAnnotationTypes("com.cootek.dialer.annotation.LaunchPerf")
-    @SupportedSourceVersion(SourceVersion.RELEASE_7)
-    public class LaunchPerfAnnotationProcessor extends AbstractProcessor {...}
+```java
+@SupportedAnnotationTypes("com.cootek.dialer.annotation.LaunchPerf")
+@SupportedSourceVersion(SourceVersion.RELEASE_7)
+public class LaunchPerfAnnotationProcessor extends AbstractProcessor {...}
+```
 
 通过`@SupportedAnnotationTypes`指定了`LaunchPerfAnnotationProcessor`是用来处理之前创建的annotation `LaunchPerf`.
 
@@ -37,17 +41,20 @@ title: 利用annotation提取代码
 
 在`LaunchPerfAnnotationProcessor`初始化时构造一个`Tree`节点：
 
-    private Trees mTrees;
-    @Override
-    public synchronized void init(ProcessingEnvironment processingEnv) {
-        super.init(processingEnv);
-        mTrees = Trees.instance(processingEnv);
-    }
+```java
+private Trees mTrees;
+@Override
+public synchronized void init(ProcessingEnvironment processingEnv) {
+    super.init(processingEnv);
+    mTrees = Trees.instance(processingEnv);
+}
+```
 
 后面会通过`TreePathScanner`的`scan`来遍历`mTrees`.
 
 接下来就是重写`AbstractProcessor`的`process`方法进行真正的处理了：
 
+```java
     private FileObject outputFile;
     private Writer outputWriter;
     private Messager mMessager;
@@ -63,37 +70,39 @@ title: 利用annotation提取代码
             }
             mMessager.printMessage(Diagnostic.Kind.NOTE, "file location:"+outputFile.toUri());
             bufferedWriter = new BufferedWriter(outputWriter);
+    } catch (IOException e) {
+    e.printStackTrace();
+}
+
+    StringBuilder stringBuilder = new StringBuilder();
+    for (Element element : roundEnv.getElementsAnnotatedWith(LaunchPerf.class)) {
+        String identifier = "// " + getElementId(element);
+        stringBuilder.append(identifier).append("\n").append(getElementSourceCode(element)).append("\n\n");
+        processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, identifier);
+    }
+
+    if (bufferedWriter != null) {
+        try {
+            bufferedWriter.append(stringBuilder.toString());
         } catch (IOException e) {
             e.printStackTrace();
-        }
-
-        StringBuilder stringBuilder = new StringBuilder();
-        for (Element element : roundEnv.getElementsAnnotatedWith(LaunchPerf.class)) {
-            String identifier = "// " + getElementId(element);
-            stringBuilder.append(identifier).append("\n").append(getElementSourceCode(element)).append("\n\n");
-            processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, identifier);
-        }
-
-        if (bufferedWriter != null) {
+        } finally {
             try {
-                bufferedWriter.append(stringBuilder.toString());
+                bufferedWriter.close();
             } catch (IOException e) {
                 e.printStackTrace();
-            } finally {
-                try {
-                    bufferedWriter.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
             }
         }
-        return true;
     }
+    return true;
+}
+```
     
 我们的需求是把所有相关的代码提取出来放到一个文件中，所以通过`processingEnv.getFiler().createResource`创建一个文件用以写入被`@LaunchPerf`标注的源代码。
 
 下一步通过`roundEnv.getElementsAnnotatedWith(LaunchPerf.class)`拿到被标注了`@LaunchPerf`的`Element`. 我们关心的`Element`有三种类别：`ElementKind.CLASS`, `ElementKind.CONSTRUCTOR`和`ElementKind.METHOD`. 为了能够区分这些`Element`，我写了一个函数`getElementId`来给每一个`Element`生成唯一的标识。
 
+```java
     private String getElementId(Element element) {
         ElementKind elementKind = element.getKind();
         if (elementKind == ElementKind.CLASS) {
@@ -112,50 +121,55 @@ title: 利用annotation提取代码
         }
         return element.getSimpleName().toString();
     }
+```
 
 一个类的标识就是包名+类名；构造函数和函数的标识是对应的类名+函数签名。
 
 生成`Element`的标识之后就是要获取相关代码了。函数`getElementSourceCode`实现了此功能。
 
-    private String getElementSourceCode(Element element) {
-        if (element.getKind() == ElementKind.CLASS) {
-            ClassScanner scanner = new ClassScanner();
-            return scanner.scan(element, mTrees);
-        } else if (element.getKind() == ElementKind.CONSTRUCTOR
-                || element.getKind() == ElementKind.METHOD) {
-            MethodScanner scanner = new MethodScanner();
-            return scanner.scan(element, mTrees);
-        }
-        return element.getSimpleName().toString();
+```java
+private String getElementSourceCode(Element element) {
+    if (element.getKind() == ElementKind.CLASS) {
+        ClassScanner scanner = new ClassScanner();
+        return scanner.scan(element, mTrees);
+    } else if (element.getKind() == ElementKind.CONSTRUCTOR
+            || element.getKind() == ElementKind.METHOD) {
+        MethodScanner scanner = new MethodScanner();
+        return scanner.scan(element, mTrees);
     }
+    return element.getSimpleName().toString();
+}
+```
 
 仍然是对类和函数进行区别对待。这里的`ClassScanner`以及`MethodScanner`都是继承自`TreePathScanner`. 先看一下`ClassScanner`的实现：
 
-    public class ClassScanner extends TreePathScanner<String, Trees> {
+```java
+public class ClassScanner extends TreePathScanner<String, Trees> {
 
-        private List<BlockTree> mBlockTreeList = new ArrayList<>();
+    private List<BlockTree> mBlockTreeList = new ArrayList<>();
 
-        public String scan(Element classElement, Trees trees) {
-            if (classElement != null
-                    && classElement.getKind() == ElementKind.CLASS) {
-                scan(trees.getPath(classElement), trees);
-                StringBuilder builder = new StringBuilder();
-                for (BlockTree blockTree : mBlockTreeList) {
-                    builder.append(blockTree).append("\n\n");
-                }
-                return builder.toString();
+    public String scan(Element classElement, Trees trees) {
+        if (classElement != null
+                && classElement.getKind() == ElementKind.CLASS) {
+            scan(trees.getPath(classElement), trees);
+            StringBuilder builder = new StringBuilder();
+            for (BlockTree blockTree : mBlockTreeList) {
+                builder.append(blockTree).append("\n\n");
             }
-            return "";
+            return builder.toString();
         }
-
-        @Override
-        public String visitBlock(BlockTree node, Trees trees) {
-            if (node.isStatic()) {
-                mBlockTreeList.add(node);
-            }
-            return super.visitBlock(node, trees);
-        }
+        return "";
     }
+
+    @Override
+    public String visitBlock(BlockTree node, Trees trees) {
+        if (node.isStatic()) {
+            mBlockTreeList.add(node);
+        }
+        return super.visitBlock(node, trees);
+    }
+}
+```
 
 对于被标注了`@LaunchPerf`的类，我们关心的是它包含的`static`代码段。因此用一个`List<BlockTree>`来保存当前类中的所有`static`代码段。
 在重写的`visitBlock`方法中，如果发现当前访问的`BlockTree`节点是`static`的，则加入`mBlockTreeList`. scan完成之后，遍历拿到的`BlockTree`，
@@ -163,29 +177,31 @@ title: 利用annotation提取代码
 
 下面是`MethodScanner`的实现：
 
-    public class MethodScanner extends TreePathScanner<String, Trees> {
+```java
+public class MethodScanner extends TreePathScanner<String, Trees> {
 
-        private MethodTree mMethodTree;
-        private String mMethodName;
+    private MethodTree mMethodTree;
+    private String mMethodName;
 
-        public String scan(Element methodElement, Trees trees) {
-            if (methodElement != null
-                    && (methodElement.getKind() == ElementKind.METHOD || methodElement.getKind() == ElementKind.CONSTRUCTOR)) {
-                mMethodName = methodElement.getSimpleName().toString();
-                scan(trees.getPath(methodElement), trees);
-                return mMethodTree != null ? mMethodTree.getBody().toString() : "";
-            }
-            return "";
+    public String scan(Element methodElement, Trees trees) {
+        if (methodElement != null
+                && (methodElement.getKind() == ElementKind.METHOD || methodElement.getKind() == ElementKind.CONSTRUCTOR)) {
+            mMethodName = methodElement.getSimpleName().toString();
+            scan(trees.getPath(methodElement), trees);
+            return mMethodTree != null ? mMethodTree.getBody().toString() : "";
         }
-
-        @Override
-        public String visitMethod(MethodTree methodTree, Trees trees) {
-            if (mMethodTree == null && mMethodName.equals(methodTree.getName().toString())) {
-                mMethodTree = methodTree;
-            }
-            return super.visitMethod(methodTree, trees);
-        }
+        return "";
     }
+
+    @Override
+    public String visitMethod(MethodTree methodTree, Trees trees) {
+        if (mMethodTree == null && mMethodName.equals(methodTree.getName().toString())) {
+            mMethodTree = methodTree;
+        }
+        return super.visitMethod(methodTree, trees);
+    }
+}
+```
 
 在`visitMethod`中记下当前函数对应的`MethodTree`. 然后调用`MethodTree.getBody().toString()`得到函数源码。
 
@@ -202,19 +218,23 @@ title: 利用annotation提取代码
 
 为了让使用者可以自定义annotation，我需要定义一个用来标注annotation的annotation。
 
-    @Documented
-    @Target({ElementType.ANNOTATION_TYPE})
-    public @interface CodeExtractor {
-    }
+```java
+@Documented
+@Target({ElementType.ANNOTATION_TYPE})
+public @interface CodeExtractor {
+}
+```
 
 通过`@Target({ElementType.ANNOTATION_TYPE})`，限制了`@CodeExtractor`只能用来标注annotation.
 
 现在我们可以自定义一个annotation：
 
-    @Target({ElementType.METHOD, ElementType.CONSTRUCTOR, ElementType.TYPE, ElementType.LOCAL_VARIABLE})
-    @CodeExtractor
-    public @interface Core {
-    }
+```java
+@Target({ElementType.METHOD, ElementType.CONSTRUCTOR, ElementType.TYPE, ElementType.LOCAL_VARIABLE})
+@CodeExtractor
+public @interface Core {
+}
+```
 
 后面就可以使用`@Core`去标注我们感兴趣的类和方法了。
 
@@ -226,53 +246,55 @@ title: 利用annotation提取代码
 
 修改后的`process`函数如下：
 
-    private Map<String, FileObject> outputFiles = new HashMap<>();
-    private Map<String, Writer> outputWriters = new HashMap<>();
-    private Set<TypeElement> annotationsForExtraction = new HashSet<>();
-    @Override
-    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        mMessager = processingEnv.getMessager();
-        for (TypeElement annotation : annotations) {
-            if (annotation.getAnnotation(CodeExtractor.class) != null) {
-                String annotationQualifiedName = String.valueOf(annotation.getQualifiedName());
-                mMessager.printMessage(Diagnostic.Kind.NOTE, "annotation:"+annotationQualifiedName);
-                try {
-                    if (!outputFiles.containsKey(annotationQualifiedName)) {
-                        annotationsForExtraction.add(annotation);
-
-                        FileObject fileObject = processingEnv.getFiler().createResource(StandardLocation.SOURCE_OUTPUT, "centrifuge", annotation.getSimpleName());
-                        outputFiles.put(annotationQualifiedName, fileObject);
-                        outputWriters.put(annotationQualifiedName, fileObject.openWriter());
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        for (TypeElement annotationType : annotationsForExtraction) {
-            StringBuilder stringBuilder = new StringBuilder();
-            for (Element element : roundEnv.getElementsAnnotatedWith(annotationType)) {
-                String identifier = "// " + getElementId(element);
-                stringBuilder.append(identifier).append("\n").append(getElementSourceCode(element)).append("\n\n");
-                processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, identifier);
-            }
-            BufferedWriter bufferedWriter = new BufferedWriter(outputWriters.get(String.valueOf(annotationType.getQualifiedName())));
+```java
+private Map<String, FileObject> outputFiles = new HashMap<>();
+private Map<String, Writer> outputWriters = new HashMap<>();
+private Set<TypeElement> annotationsForExtraction = new HashSet<>();
+@Override
+public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+    mMessager = processingEnv.getMessager();
+    for (TypeElement annotation : annotations) {
+        if (annotation.getAnnotation(CodeExtractor.class) != null) {
+            String annotationQualifiedName = String.valueOf(annotation.getQualifiedName());
+            mMessager.printMessage(Diagnostic.Kind.NOTE, "annotation:"+annotationQualifiedName);
             try {
-                bufferedWriter.append(stringBuilder.toString());
+                if (!outputFiles.containsKey(annotationQualifiedName)) {
+                    annotationsForExtraction.add(annotation);
+
+                    FileObject fileObject = processingEnv.getFiler().createResource(StandardLocation.SOURCE_OUTPUT, "centrifuge", annotation.getSimpleName());
+                    outputFiles.put(annotationQualifiedName, fileObject);
+                    outputWriters.put(annotationQualifiedName, fileObject.openWriter());
+                }
             } catch (IOException e) {
                 e.printStackTrace();
-            } finally {
-                try {
-                    bufferedWriter.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
             }
         }
-
-        return true;
     }
+
+    for (TypeElement annotationType : annotationsForExtraction) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (Element element : roundEnv.getElementsAnnotatedWith(annotationType)) {
+            String identifier = "// " + getElementId(element);
+            stringBuilder.append(identifier).append("\n").append(getElementSourceCode(element)).append("\n\n");
+            processingEnv.getMessager().printMessage(Diagnostic.Kind.NOTE, identifier);
+        }
+        BufferedWriter bufferedWriter = new BufferedWriter(outputWriters.get(String.valueOf(annotationType.getQualifiedName())));
+        try {
+            bufferedWriter.append(stringBuilder.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                bufferedWriter.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    return true;
+}
+```
 
 现在需要写多个文件，所以用一个`Map`来保存。另外用一个`Set`来保存所有被标注了`@CodeExtractor`的annotation. 判定一个annotation是否被标注了`@CodeExtractor`
 的方式就是`annotation.getAnnotation(CodeExtractor.class) != null`. 拿到了所有被标注了`@CodeExtractor`的annotation之后，只需遍历这些annotation，对每一个
