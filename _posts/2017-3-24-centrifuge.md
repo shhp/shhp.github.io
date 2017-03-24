@@ -97,7 +97,7 @@ public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment 
     return true;
 }
 ```
-    
+
 我们的需求是把所有相关的代码提取出来放到一个文件中，所以通过`processingEnv.getFiler().createResource`创建一个文件用以写入被`@LaunchPerf`标注的源代码。
 
 下一步通过`roundEnv.getElementsAnnotatedWith(LaunchPerf.class)`拿到被标注了`@LaunchPerf`的`Element`. 我们关心的`Element`有三种类别：`ElementKind.CLASS`, `ElementKind.CONSTRUCTOR`和`ElementKind.METHOD`. 为了能够区分这些`Element`，我写了一个函数`getElementId`来给每一个`Element`生成唯一的标识。
