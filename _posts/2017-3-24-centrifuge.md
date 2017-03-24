@@ -55,24 +55,24 @@ public synchronized void init(ProcessingEnvironment processingEnv) {
 接下来就是重写`AbstractProcessor`的`process`方法进行真正的处理了：
 
 ```java
-    private FileObject outputFile;
-    private Writer outputWriter;
-    private Messager mMessager;
+private FileObject outputFile;
+private Writer outputWriter;
+private Messager mMessager;
     
-    @Override
-    public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        BufferedWriter bufferedWriter = null;
-        mMessager = processingEnv.getMessager();
-        try {
-            if (outputFile == null) {
-                outputFile = processingEnv.getFiler().createResource(StandardLocation.SOURCE_OUTPUT, "launchPerf", "related_code");
-                outputWriter = outputFile.openWriter();
-            }
-            mMessager.printMessage(Diagnostic.Kind.NOTE, "file location:"+outputFile.toUri());
-            bufferedWriter = new BufferedWriter(outputWriter);
+@Override
+public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+    BufferedWriter bufferedWriter = null;
+    mMessager = processingEnv.getMessager();
+    try {
+        if (outputFile == null) {
+            outputFile = processingEnv.getFiler().createResource(StandardLocation.SOURCE_OUTPUT, "launchPerf", "related_code");
+            outputWriter = outputFile.openWriter();
+        }
+        mMessager.printMessage(Diagnostic.Kind.NOTE, "file location:"+outputFile.toUri());
+        bufferedWriter = new BufferedWriter(outputWriter);
     } catch (IOException e) {
-    e.printStackTrace();
-}
+        e.printStackTrace();
+    }
 
     StringBuilder stringBuilder = new StringBuilder();
     for (Element element : roundEnv.getElementsAnnotatedWith(LaunchPerf.class)) {
@@ -103,24 +103,24 @@ public synchronized void init(ProcessingEnvironment processingEnv) {
 下一步通过`roundEnv.getElementsAnnotatedWith(LaunchPerf.class)`拿到被标注了`@LaunchPerf`的`Element`. 我们关心的`Element`有三种类别：`ElementKind.CLASS`, `ElementKind.CONSTRUCTOR`和`ElementKind.METHOD`. 为了能够区分这些`Element`，我写了一个函数`getElementId`来给每一个`Element`生成唯一的标识。
 
 ```java
-    private String getElementId(Element element) {
-        ElementKind elementKind = element.getKind();
-        if (elementKind == ElementKind.CLASS) {
-            return ((TypeElement)element).getQualifiedName().toString();
-        } else if (elementKind == ElementKind.CONSTRUCTOR
-                || elementKind == ElementKind.METHOD) {
-            StringBuilder builder = new StringBuilder();
-            TypeElement parent = (TypeElement) element.getEnclosingElement();
-            ExecutableElement thisElement = (ExecutableElement) element;
-            builder.append(parent.getQualifiedName()).append("#").append(thisElement.getSimpleName()).append("(");
-            for (VariableElement parameter : thisElement.getParameters()) {
-                builder.append(parameter.asType()).append(" ").append(parameter.getSimpleName()).append(",");
-            }
-            builder.append(")");
-            return builder.toString();
+private String getElementId(Element element) {
+    ElementKind elementKind = element.getKind();
+    if (elementKind == ElementKind.CLASS) {
+        return ((TypeElement)element).getQualifiedName().toString();
+    } else if (elementKind == ElementKind.CONSTRUCTOR
+            || elementKind == ElementKind.METHOD) {
+        StringBuilder builder = new StringBuilder();
+        TypeElement parent = (TypeElement) element.getEnclosingElement();
+        ExecutableElement thisElement = (ExecutableElement) element;
+        builder.append(parent.getQualifiedName()).append("#").append(thisElement.getSimpleName()).append("(");
+        for (VariableElement parameter : thisElement.getParameters()) {
+            builder.append(parameter.asType()).append(" ").append(parameter.getSimpleName()).append(",");
         }
-        return element.getSimpleName().toString();
+        builder.append(")");
+        return builder.toString();
     }
+    return element.getSimpleName().toString();
+}
 ```
 
 一个类的标识就是包名+类名；构造函数和函数的标识是对应的类名+函数签名。
