@@ -3,17 +3,17 @@ layout: post
 title: 利用annotation提取代码
 ---
 
-###背景介绍
+### 背景介绍
 
 我们团队在对app进行启动性能优化后一直在思考一个问题：有没有办法在开发的时候就能知道某次代码修改有可能影响启动性能。这样就不会导致在发现启动变慢后，再去花费大量时间排查问题。
 
-###解决方案
+### 解决方案
 
 受[dagger](https://github.com/square/dagger)的启发，我有了一个想法：可以利用Java的`Annotation`把跟启动有关的代码在编译时提取出来，放在一个文件中，同时将这个文件加入git版本管理。如此一来，只要查看这个文件的提交历史记录，我们就可以知道某一次的commit是否包含可能影响启动性能的代码了。这篇文章就是对我实现这个功能的概括总结。
 
 <!-- more -->
 
-####1. 定义`Annotation`
+#### 1. 定义`Annotation`
 
 首先定义一个`Annotation`如下：
 
@@ -22,7 +22,7 @@ title: 利用annotation提取代码
     }
 在`@Target`中指定`@LaunchPerf`可以用来标注类、构造函数以及函数。
 
-####2. 实现Annotation Processor
+#### 2. 实现Annotation Processor
 
 接下来实现我们自己的Annotation Processor. 我们需要创建一个`AbstractProcessor`的子类：
 
@@ -196,7 +196,7 @@ title: 利用annotation提取代码
 意思是离心机。我觉得这个工具就好比代码的离心机，将不同性质的代码分离提取。源代码放在了[github](https://github.com/shhp/Centrifuge)上。接下来我就说明如何扩展
 上面的工程实现*Centrifuge*.
 
-####1. 允许自定义annotation
+#### 1. 允许自定义annotation
 
 为了让使用者可以自定义annotation，我需要定义一个用来标注annotation的annotation。
 
@@ -216,7 +216,7 @@ title: 利用annotation提取代码
 
 后面就可以使用`@Core`去标注我们感兴趣的类和方法了。
 
-####2. 修改annotation processor
+#### 2. 修改annotation processor
 
 下一步就是要修改annotation processor了。之前通过`@SupportedAnnotationTypes("com.cootek.dialer.annotation.LaunchPerf")`限定了我们的annotation processor
 只是用来处理`@LaunchPerf`. 现在为了能够处理使用者自定义的annotation，需要将其修改为`@SupportedAnnotationTypes({"*"})`，这意味着新的annotation processor
@@ -276,7 +276,7 @@ title: 利用annotation提取代码
 的方式就是`annotation.getAnnotation(CodeExtractor.class) != null`. 拿到了所有被标注了`@CodeExtractor`的annotation之后，只需遍历这些annotation，对每一个
 annotation利用之前的方法进行代码提取即可。
 
-###来点结语
+### 来点结语
 
 Annotation其实是很强大的。现在有不少开源库（如*Dagger*, *Retrofit*）都利用了annotation，让开发者可以快速高效地写出简洁的代码。大胆地发挥想象，说不定
 annotation就能成为帮助你编程的利器！
