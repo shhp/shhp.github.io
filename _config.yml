@@ -22,7 +22,7 @@ theme_settings:
 
   # Icons
   rss: false
-  email_address: "herculeshhp@gmail.com"
+  email_address: "herculeshhp@foxmail.com"
   behance:
   bitbucket:
   dribbble:
@@ -68,7 +68,10 @@ paginate_path: "blog/page:num"
 
 # BUILD SETTINGS
 markdown: kramdown
-highlighter: rouge
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+  
 sass:
   sass_dir: _sass
   style: :compressed
