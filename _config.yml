@@ -7,14 +7,14 @@ encoding: utf-8
 # THEME-SPECIFIC CONFIGURATION
 theme_settings:
   # Meta
-  title: shhp的博客
+  title: 程序世界冒险记
   avatar: avatar.jpeg
   gravatar: # Email MD5 hash
   description: "" # used by search engines
 
   # Header and footer text
   header_text: >
-     <p>shhp的博客·学无止境</p>
+     <p>在广袤的程序世界，探索未知</p>
 
   header_text_feature_image: lib/images/index_feature_img.png
   footer_text: >
